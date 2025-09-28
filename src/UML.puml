@@ -1,0 +1,168 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+!define LIGHTBLUE #E6F3FF
+!define LIGHTGREEN #E6FFE6
+!define LIGHTYELLOW #FFFACD
+!define LIGHTPINK #FFE6F0
+
+' Configuración de layout
+!theme plain
+skinparam linetype ortho
+
+' Interfaces principales
+interface SujetoAlerta {
+    + registrarObservador(observador: ObservadorAlerta)
+    + eliminarObservador(observador: ObservadorAlerta)
+    + notificarObservadores(alerta : Alerta)
+}
+
+interface ObservadorAlerta {
+    + actualizar(alerta : Alerta)
+    + obtenerTipoObservador() : String
+}
+
+interface EstrategiaAnalisis {
+    + analizar(sensor : Sensor) : Alerta
+}
+
+' Enumeración y clases principales
+enum NivelAlerta {
+    CRITICO
+    ADVERTENCIA
+    INFORMATIVO
+}
+
+class Alerta {
+    - idSensor : String
+    - mensajes : String
+    - nivel : NivelAlerta
+    - fechaHora : Date
+    + Alerta(idSensor : String, mensaje : String, nivel : NivelAlerta, fechaHora : Date)
+    + getIdSensor() : String
+    + getMensaje() : String
+    + getNivel() : NivelAlerta
+    + getFechaHora() : Date
+}
+
+class Sensor {
+    - id : String
+    - tipo : String
+    - valor : double
+    - ubicacion : String
+    - ultimaActualizacion : Date
+    + Sensor(id: String, tipo: String, valor: double, ubicacion: String)
+    + getId() : String
+    + getTipo() : String
+    + getValor() : double
+    + setValor(valor: double) : void
+    + getUbicacion() : String
+    + getUltimaActualizacion() : Date
+    + setUltimaActualizacion(fecha: Date) : void
+}
+
+' Paquete de Estrategias
+    class EstrategiaAnalisisBasica implements EstrategiaAnalisis {
+        + analizar(sensor : Sensor) : Alerta
+    }
+
+    class EstrategiaAnalisisCalidadAire implements EstrategiaAnalisis {
+        + analizar(sensor : Sensor) : Alerta
+    }
+
+    class EstrategiaAnalisisEnergia implements EstrategiaAnalisis {
+        + analizar(sensor : Sensor) : Alerta
+    }
+
+    class EstrategiaAnalisisHumedad implements EstrategiaAnalisis {
+        + analizar(sensor : Sensor) : Alerta
+    }
+
+    class EstrategiaAnalisisTemperatura implements EstrategiaAnalisis {
+        + analizar(sensor : Sensor) : Alerta
+    }
+
+    class EstrategiaAnalisisVibracion implements EstrategiaAnalisis {
+        + analizar(sensor : Sensor) : Alerta
+    }
+
+
+' Paquete de Observadores
+    class NotificadorDashboard implements ObservadorAlerta {
+        + actualizar(alerta: Alerta) : void
+        + obtenerTipoObservador() : String
+    }
+
+    class NotificadorEmail implements ObservadorAlerta {
+        + actualizar(alerta: Alerta) : void
+        + obtenerTipoObservador() : String
+    }
+
+    class NotificadorSMS implements ObservadorAlerta {
+        + actualizar(alerta: Alerta) : void
+        + obtenerTipoObservador() : String
+    }
+
+    class RegistradorLogs implements ObservadorAlerta {
+        - logs : List<String>
+        + actualizar(alerta: Alerta) : void
+        + obtenerTipoObservador() : String
+        + obtenerLogs() : List<String>
+    }
+
+' Clases principales del sistema
+class GestorSensores {
+    - instancia : GestorSensores
+    - sensores : Map<String, Sensor>
+    - GestorSensores()
+    + obtenerInstancia() : GestorSensores
+    + registrarSensor(sensor : Sensor)
+    + actualizarValorSensor(idSensor : String, nuevoValor : double)
+    + obtenerSensor(idSensor : String) : Sensor
+    + eliminarSensor(idSensor : String)
+    + obtenerTodosSensores() : List<Sensor>
+    + obtenerCantidadSensores() : int
+    + obtenerSensoresPorTipo(tipo : String) : List<Sensor>
+    + obtenerEstadisticas()
+}
+
+class NotificadorAlertas implements SujetoAlerta {
+    - instancia : NotificadorAlertas
+    - observadores : List<ObservadorAlerta>
+    - estrategia : EstrategiaAnalisis
+    + obtenerInstancia() : NotificadorAlertas
+    + verificarYNotificar(sensor: Sensor) : void
+    + registrarObservador(observador: ObservadorAlerta) : void
+    + eliminarObservador(observador: ObservadorAlerta) : void
+    + notificarObservadores(alerta: Alerta) : void
+    + establecerEstrategiaAnalisis(estrategia: EstrategiaAnalisis) : void
+    + obtenerCantidadObservadores() : int
+    + obtenerObservadores() : List<ObservadorAlerta>
+}
+
+' Relaciones principales
+Alerta --> NivelAlerta
+
+NotificadorAlertas *-- ObservadorAlerta
+NotificadorAlertas --> EstrategiaAnalisis : usa
+NotificadorAlertas --> Sensor : analiza
+NotificadorAlertas ..> Alerta : crea
+
+GestorSensores --> Sensor : gestiona
+GestorSensores --> NotificadorAlertas : notifica
+
+' Posicionamiento manual para mejor organización
+SujetoAlerta -up-|> NotificadorAlertas
+ObservadorAlerta <|-down- NotificadorDashboard
+ObservadorAlerta <|-down- NotificadorEmail
+ObservadorAlerta <|-down- NotificadorSMS
+ObservadorAlerta <|-down- RegistradorLogs
+
+EstrategiaAnalisis <|.. EstrategiaAnalisisBasica
+EstrategiaAnalisis <|.. EstrategiaAnalisisCalidadAire
+EstrategiaAnalisis <|.. EstrategiaAnalisisEnergia
+EstrategiaAnalisis <|.. EstrategiaAnalisisHumedad
+EstrategiaAnalisis <|.. EstrategiaAnalisisTemperatura
+EstrategiaAnalisis <|.. EstrategiaAnalisisVibracion
+
+@enduml
