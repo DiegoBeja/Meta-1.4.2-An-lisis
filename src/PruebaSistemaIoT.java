@@ -16,10 +16,12 @@ public class PruebaSistemaIoT {
         Sensor sensorTemperatura = new Sensor("TEMP-001", "temperatura", 25.0, "Sala de Máquinas A");
         Sensor sensorVibracion = new Sensor("VIB-001", "vibracion", 2.0, "Motor Principal");
         Sensor sensorEnergia = new Sensor("ENER-001", "energia", 800.0, "Subestación Eléctrica");
+        Sensor sensorCalidadAire = new Sensor("AIRE-001", "aire", 10, "Mexicali");
 
         gestor.registrarSensor(sensorTemperatura);
         gestor.registrarSensor(sensorVibracion);
         gestor.registrarSensor(sensorEnergia);
+        gestor.registrarSensor(sensorCalidadAire);
 
         System.out.println("\n=== 🔬 SIMULANDO LECTURAS DE SENSORES ===\n");
 
@@ -38,10 +40,35 @@ public class PruebaSistemaIoT {
         gestor.actualizarValorSensor("VIB-001", 6.5);
         Thread.sleep(1000);
 
+        System.out.println("\n--- Calidad aire buena ---");
+        gestor.actualizarValorSensor("AIRE-001", 50);
+        Thread.sleep(1000);
+
+        System.out.println("\n--- Calidad aire mala ---");
+        gestor.actualizarValorSensor("AIRE-001", 110);
+        Thread.sleep(1000);
+
         // Cambiar estrategia en tiempo de ejecución
+        System.out.println("TEMP");
+        notificador.establecerEstrategiaAnalisis(new EstrategiaAnalisisTemperatura());
+        gestor.actualizarValorSensor("TEMP-001", 45.0);
+
+        notificador.establecerEstrategiaAnalisis(new EstrategiaAnalisisTemperatura());
+        gestor.actualizarValorSensor("TEMP-001", 85.0);
+
+        System.out.println("Aire");
+        notificador.establecerEstrategiaAnalisis(new EstrategiaAnalisisCalidadAire());
+        gestor.actualizarValorSensor("AIRE-001", 50);
+
+        notificador.establecerEstrategiaAnalisis(new EstrategiaAnalisisCalidadAire());
+        gestor.actualizarValorSensor("AIRE-001", 150);
+
         System.out.println("\n--- Cambio de Estrategia ---");
         notificador.establecerEstrategiaAnalisis(new EstrategiaAnalisisVibracion());
         gestor.actualizarValorSensor("VIB-001", 3.5);
+
+        notificador.establecerEstrategiaAnalisis(new EstrategiaAnalisisTemperatura());
+        gestor.actualizarValorSensor("TEMP-001", 45.0);
 
         // Alto consumo energético
         System.out.println("\n--- Alto Consumo Energético ---");
